@@ -1,25 +1,42 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger: none
-
 pool:
   vmImage: ubuntu-latest
+stages:
+- stage: LegacyPre
+  displayName: Legacy steps (pre)
+  jobs:
+  - job: legacy_pre
+    displayName: Legacy steps (pre)
+    steps:
+    - script: echo Hello, param world!
+      displayName: Run a one-line script
+- stage: BlackduckCoverityOnPolaris
+  displayName: Blackduck + Coverity on Polaris
+  jobs:
+  - job: polaris_scan
+    displayName: Polaris scan
+    steps:
+    - task: SynopsysPolaris@1
+      inputs:
+        polarisService: test01
+        polarisCommand: polaris
+        waitForIssues: true
+        populateChangeSetFile: true
+    - task: BlackduckCoverityOnPolaris@2
+      inputs:
+        polarisService: test1
+        polarisCommand: polaris
+        waitForIssues: true
+        populateChangeSetFile: true
+- stage: LegacyPost
+  displayName: Legacy steps (post)
+  jobs:
+  - job: legacy_post
+    displayName: Legacy steps (post)
+    steps:
+    - script: 'echo Add other tasks to build, test, and deploy your project.
 
-steps:
-- script: echo Hello, param world! 
-  displayName: 'Run a one-line script'
+        echo See https://aka.ms/yaml
 
-- task: SynopsysPolaris@1
-  inputs:
-    polarisService: 'test01'
-    polarisCommand: 'polaris'
-    waitForIssues: true
-    populateChangeSetFile: true
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+        '
+      displayName: Run a multi-line script
