@@ -1,33 +1,47 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- master
+- main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # Non-secret values can live here or in variable groups
+  POLARIS_APP_NAME: 'MyApp'
+  POLARIS_PROJECT_NAME: 'MyProject'
+  POLARIS_BRANCH_NAME: '$(Build.SourceBranchName)'
 
 steps:
-- script: echo Hello, param world! 
-  displayName: 'Run a one-line script'
+- checkout: self
+  fetchDepth: 0
 
-- task: SynopsysPolaris@1
-  inputs:
-    polarisService: 'test01'
-    polarisCommand: 'polaris'
-    waitForIssues: true
-    populateChangeSetFile: true
+# 1) Download Bridge CLI (you host the zip internally OR use your allowed download endpoint)
+- bash: |
+    set -euo pipefail
+    mkdir -p $(Agent.TempDirectory)/bridge
+    cd $(Agent.TempDirectory)/bridge
 
-- task: BlackduckCoverityOnPolaris@2
-  inputs:
-    polarisService: 'test1'
-    polarisCommand: 'polaris'
-    waitForIssues: true
-    populateChangeSetFile: true
+    echo "Download Bridge CLI zip..."
+    # Example: curl -L -o bridge.zip "<YOUR_BRIDGE_CLI_ZIP_URL>"
+    # unzip bridge.zip
+    # chmod +x bridge-cli
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    echo "Bridge CLI ready at: $(Agent.TempDirectory)/bridge/bridge-cli"
+  displayName: 'Install Synopsys Bridge CLI'
+
+# 2) Run Polaris stage using Bridge CLI
+- bash: |
+    set -euo pipefail
+
+    export BRIDGE_polaris_accessToken="$(POLARIS_ACCESS_TOKEN)"
+
+    $(Agent.TempDirectory)/bridge/bridge-cli --stage polaris \
+      polaris.serverUrl="$(POLARIS_SERVER_URL)" \
+      polaris.application.name="$(POLARIS_APP_NAME)" \
+      polaris.project.name="$(POLARIS_PROJECT_NAME)" \
+      polaris.branch.name="$(POLARIS_BRANCH_NAME)" \
+      polaris.assessment.types="SAST,SCA"
+
+  displayName: 'Run Polaris Scan via Bridge CLI'
+  env:
+    POLARIS_SERVER_URL: $(POLARIS_SERVER_URL)
+    POLARIS_ACCESS_TOKEN: $(POLARIS_ACCESS_TOKEN)   # mark as secret in ADO
