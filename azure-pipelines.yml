@@ -45,31 +45,3 @@ steps:
   inputs:
     versionSpec: "18.x"
   displayName: "Use Node.js 18"
-
-# ------------------------------------------------------------
-# Optional: Download and install Coverity CLI (enable if needed)
-# ------------------------------------------------------------
-# - bash: |
-#     set -euo pipefail
-#     echo "Installing Coverity CLI into $(Agent.ToolsDirectory)/coverity"
-#     mkdir -p "$(Agent.ToolsDirectory)/coverity"
-#     cd "$(Agent.ToolsDirectory)/coverity"
-#
-#     # Example download (replace with your internal artifact URL)
-#     # If no auth needed:
-#     #   curl -L -o coverity.tgz "$(COVERITY_CLI_URL)"
-#     #
-#     # If auth token needed:
-#     #   curl -L -H "Authorization: Bearer $(COVERITY_CLI_TOKEN)" -o coverity.tgz "$(COVERITY_CLI_URL)"
-#
-#     echo "ERROR: Replace this section with your internal Coverity CLI download method"
-#     exit 1
-#
-#     tar -xzf coverity.tgz --strip-components=1
-#     echo "Coverity CLI installed. Listing bin:"
-#     ls -la "$(Agent.ToolsDirectory)/coverity/bin"
-#   displayName: "Install Coverity CLI (Optional)"
-
-# ------------------------------------------------------------
-# Coverity SAST scan - Direct CLI invocation (POC)
-# ------------------------------------------------------------
