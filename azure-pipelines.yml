@@ -16,12 +16,6 @@ stages:
   - job: polaris_scan
     displayName: Polaris scan
     steps:
-    - task: SynopsysPolaris@1
-      inputs:
-        polarisService: test01
-        polarisCommand: polaris
-        waitForIssues: true
-        populateChangeSetFile: true
     - task: BlackduckCoverityOnPolaris@2
       inputs:
         polarisService: test1
